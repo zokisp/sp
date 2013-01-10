@@ -1,0 +1,220 @@
+#include <iostream>
+#include "red_polja.h"
+//#include "red_pok.h"
+#include <cstdlib>
+#include <string.h>
+using namespace std;
+
+int N;
+queue*q=new queue;
+queue*novi_red=new queue;
+struct slucajni_brojevi{
+  int ai;
+	int bi;
+	int ci;
+	int di;
+};
+
+	slucajni_brojevi*struktura_slucajni;
+void ispis(jedan_covjek*pomocni){
+	cout<<endl<<"-------------------------"<<endl;
+	cout<<"Ime= "<<pomocni->ime<<endl;
+	cout<<"Prezime= "<<pomocni->prezime<<endl;
+	cout<<"Datum= "<<pomocni->god<<endl;
+	cout<<"ai= "<<pomocni->ai<<endl;
+	cout<<"bi= "<<pomocni->bi<<endl;
+	cout<<"ci= "<<pomocni->ci<<endl;
+	cout<<"di= "<<pomocni->di<<endl;
+	cout<<"Stanje tekuceg= "<<pomocni->tekuci_racun<<endl;
+	cout<<"Stanje deviznog= "<<pomocni->devizni_racun<<"  "<<pomocni->naziv_strane_valute<<endl;
+}
+
+void peti(int posto, int pozicija){
+	if(empty(q)==1)return;
+	jedan_covjek*pomocni=new jedan_covjek;
+	if(pozicija<posto){
+		pomocni=frontQueue(q);
+		deQueue(q);
+		pozicija++;
+		peti(posto,pozicija);
+	}
+	else{
+		while(empty(q)==0){
+			pomocni=frontQueue(q);
+			ispis(pomocni);
+			enQueue(novi_red,pomocni);
+			deQueue(q);
+		}
+		return;
+	}
+	enQueue(q,pomocni);
+}
+
+void peti2(int posto,int pozicija){
+	if(empty(q)==1)return;
+	jedan_covjek*pomocni=new jedan_covjek;
+	pomocni=frontQueue(q);
+	pozicija++;
+	deQueue(q);
+	peti2(posto,pozicija);
+	ispis(pomocni);
+	enQueue(q,pomocni);
+}
+void funkcija2(queue*q){
+	jedan_covjek pomocni_red[N];
+				for(int i=0;i<N;i++){
+					cout<<"----------------------------------"<<endl;
+					jedan_covjek*pomocni_covjek=new jedan_covjek;
+					pomocni_covjek->ai=struktura_slucajni[i].ai;
+					pomocni_covjek->bi=struktura_slucajni[i].bi;
+					pomocni_covjek->ci=struktura_slucajni[i].ci;
+					pomocni_covjek->di=struktura_slucajni[i].di;
+					cout<<"Ime= ";
+					cin>>pomocni_covjek->ime;
+					cout<<"Prezime= ";
+					cin>>pomocni_covjek->prezime;
+					cout<<"Datum= ";
+					cin>>pomocni_covjek->god;
+					cout<<"Stanje tekuceg racuna= ";
+					cin>>pomocni_covjek->tekuci_racun;
+					cout<<"Valuta deviznog racuna= ";
+					cin>>pomocni_covjek->naziv_strane_valute;
+					cout<<"Stanje deviznog racuna= ";
+					cin>>pomocni_covjek->devizni_racun;
+					cout<<"----------------------------------"<<endl;
+					enQueue(q,pomocni_covjek);
+					memcpy(&pomocni_red[i],pomocni_covjek,sizeof(jedan_covjek));
+				}
+				while(empty(q)==0)deQueue(q);
+				for(int i=1;i<N;i++){
+					int j=i-1;
+					int pom=pomocni_red[i].ci;
+					jedan_covjek pomak=pomocni_red[i];
+					while(j>=0&&pomocni_red[j].ci>pom){
+						pomocni_red[j+1]=pomocni_red[j--];
+						pomocni_red[j+1]=pomak;
+					}
+				}
+				for(int i=0;i<N;i++){
+					jedan_covjek*nov=new jedan_covjek;
+					if(pomocni_red[i].devizni_racun>10000){
+						cout<<"Osoba ime= "<<pomocni_red[i].ime<<", prezime= "<<pomocni_red[i].prezime<<" ima preko 10000 "<<pomocni_red[i].naziv_strane_valute<<endl;
+					}
+					memcpy(nov,&pomocni_red[i],sizeof(jedan_covjek));
+					enQueue(q,nov);
+				}
+}
+
+void funkcija3(queue*q){
+				int stare=0,brze=0;
+				jedan_covjek stare_transakcije[N];
+				jedan_covjek brze_transakcije[N];
+				jedan_covjek*pomocni=new jedan_covjek;
+				for(int i=0;i<N;i++){
+					pomocni=frontQueue(q);
+					if(pomocni->di==3){
+						memcpy(&brze_transakcije[brze],pomocni,sizeof(jedan_covjek));
+						brze++;
+					}
+					else{
+						memcpy(&stare_transakcije[stare],pomocni,sizeof(jedan_covjek));
+						stare++;
+					}
+					deQueue(q);
+				}
+				cout<<endl;
+				cout<<"Originalni red "<<endl;
+				cout<<"====================================="<<endl;
+				for(int i=0;i<stare;i++){
+					ispis(&stare_transakcije[i]);
+					enQueue(q,&stare_transakcije[i]);
+					}
+				cout<<endl;
+				cout<<"Brzi red "<<endl;
+				cout<<"====================================="<<endl;
+				for(int i=0;i<stare;i++)
+					ispis(&brze_transakcije[i]);
+}
+int main(){
+	init(novi_red);
+	init(q);
+
+	int c;
+	do{
+		cout<<"1. Generiranje cetvorki"<<endl;
+		cout<<"2. Dodavanje zapisa o klijentima banke "<<endl;
+		cout<<"3. Dodavanje klijenata u brzi red "<<endl;
+		cout<<"4. Izbacivanje odredenih klijenata"<<endl;
+		cout<<"5. Otvaranje novog reda u banci"<<endl;
+		cout<<"6. Izlaz iz programa"<<endl;
+		cout<<"Vas izbor: ";
+		cin>>c;
+		switch(c){
+			///////
+			case 1:{
+				cout<<"Koliko brojeva zelite generirat? ";
+				cout<<"Vas izbor: ";
+				cin>>N;
+				struktura_slucajni=new slucajni_brojevi[N];
+				for(int i=0;i<N;i++){
+					struktura_slucajni[i].ai=(rand()%400)+100;
+					struktura_slucajni[i].bi=(rand()%400)+100;
+					do{
+						struktura_slucajni[i].ci=(rand()%6)+1;
+						struktura_slucajni[i].di=(rand()%4)+1;
+					}
+					while(struktura_slucajni[i].ci==6&&struktura_slucajni[i].di==2);
+				}
+				break;
+			}
+			case 2:{
+				funkcija2(q);
+				break;
+			}
+			case 3:
+				{
+				funkcija3(q);
+				break;
+			}
+			case 4:
+				{
+				jedan_covjek pomocni_red[N];
+				int brojac_osoba=0;
+				cout<<"============================="<<endl;
+				cout<<"OSOBE KOJE IZBACUJEM IZ REDA"<<endl;
+				cout<<"============================="<<endl;
+				for(int i=0;i<N;i++){
+					jedan_covjek*pomocni=new jedan_covjek;
+					pomocni=frontQueue(q);
+					deQueue(q);
+					if(pomocni->ci==4&&(2012-pomocni->god)<30&&pomocni->di==1&&pomocni->tekuci_racun<100){
+						ispis(pomocni);
+					}
+					else if(pomocni->ci==1&&pomocni->di==2&&pomocni->tekuci_racun>5000){
+						ispis(pomocni);
+					}
+					else{
+						memcpy(&pomocni_red[brojac_osoba],pomocni,sizeof(jedan_covjek));
+						brojac_osoba++;
+					}
+				}
+				for(int i=0;i<brojac_osoba;i++)
+					enQueue(q,&pomocni_red[i]);
+				break;
+		}
+			case 5:{
+				int posto=0.7*N;
+				cout<<"ISPISUJEM NOVI RED"<<endl;
+				peti(posto,0);
+				cout<<"ISPISUJEM STARI RED"<<endl;
+				peti2(posto,0);
+				break;
+			}
+			default:
+				break;
+		}
+	}while(c!=6);
+
+	cin>>N;
+	return 0;	
+}
